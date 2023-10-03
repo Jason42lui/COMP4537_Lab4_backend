@@ -20,41 +20,35 @@ const server = http.createServer(function (req, res) {
       res.writeHead(404, "Content-Type", "application/json");
       res.end(JSON.stringify({ error: "Word not found" }));
     }
-  } else if (req.method === "POST" && q.pathname === "/api/") {
-    let body = "";
+    } else if (req.method === 'POST' && q.pathname === '/api/') {
+        let body = '';
 
-    req.on("data", (chunk) => {
-      body += chunk.toString();
-    });
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
 
-    req.on("end", () => {
-      const params = qs.parse(body);
-      const word = params.word;
-      const definition = params.definition;
+        req.on('end', () => {
+            const params = qs.parse(body);
+            const word = params.word;
+            const definition = params.definition;
 
-      if (!word || !definition || /\d/.test(word)) {
-        res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Invalid input" }));
-      } else {
-        if (dictionary[word]) {
-          res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(
-            JSON.stringify({ message: `Warning! '${word}' already exists` })
-          );
-        } else {
-          dictionary[word] = definition;
-          res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(
-            JSON.stringify({
-              message: `Request #${
-                Object.keys(dictionary).length
-              }\n\nNew entry recorded:\n\n"${word} : ${definition}"`,
-            })
-          );
-        }
-      }
-    });
-  }
+            if (!word || !definition || /\d/.test(word)) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid input' }));
+            } else {
+                if (dictionary[word]) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: `Warning! '${word}' already exists` }));
+                } else {
+                    dictionary[word] = definition;
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                    message: `Request #${Object.keys(dictionary).length}\n\nNew entry recorded:\n\n"${word} : ${definition}"`,
+                    }));
+                }
+            }
+        });
+    }
 });
 
 server.listen(3000, () => {
