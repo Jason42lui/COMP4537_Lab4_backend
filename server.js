@@ -1,6 +1,5 @@
 const http = require("http");
 const url = require("url");
-const qs = require("querystring");
 
 let dictionary = {};
 
@@ -70,6 +69,7 @@ const server = http.createServer(function (req, res) {
               }\n\nNew entry recorded:\n\n"${word} : ${definition}"`,
             })
           );
+          console.log("dict", dictionary);
           return;
         }
       }
