@@ -13,6 +13,7 @@ const server = http.createServer(function (req, res) {
     const word = q.query.word;
     const word_status = dictionary[word];
     console.log("word", word);
+    console.log("wordstatus", word_status);
     res.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1:5500");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST");
 
@@ -31,10 +32,8 @@ const server = http.createServer(function (req, res) {
     });
 
     req.on("end", () => {
-      console.log(params);
-      const params = JSON.parse(body);
-      const word = params.word;
-      const definition = params.definition;
+      const word = q.query.word;
+      const definition = q.query.definition;
 
       if (!word || !definition || /\d/.test(word)) {
         res.writeHead(400, { "Content-Type": "application/json" });
