@@ -1,28 +1,36 @@
 const http = require("http");
 const url = require("url");
+const qs = require("querystring");
 
 let dictionary = {};
 
 const server = http.createServer(function (req, res) {
   let q = url.parse(req.url, true);
-  console.log("q", q);
-  console.log("q.pathname", q.pathname);
-  console.log("q.query", q.query);
+  if (req.method === "OPTIONS") {
+    res.writeHead(200, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST",
+      "Access-Control-Allow-Headers": "Content-Type",
+    });
+    res.end();
+    return;
+  }
 
   if (req.method === "GET" && q.pathname === "/api/") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
     const word = q.query.word;
     const word_status = dictionary[word];
     console.log("word", word);
     console.log("wordstatus", word_status);
-    res.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1:5500");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST");
 
     if (word_status) {
       res.writeHead(200, "Content-Type", "application/json");
-      res.end(JSON.stringify(word_status));
+      res.end(JSON.stringify({ responseText: word_status }));
+      return;
     } else {
       res.writeHead(404, "Content-Type", "application/json");
-      res.end(JSON.stringify({ error: "Word not found" }));
+      res.end(JSON.stringify({ responseText: "Word not found" }));
+      return;
     }
   } else if (req.method === "POST" && q.pathname === "/api/") {
     let body = "";
@@ -32,28 +40,37 @@ const server = http.createServer(function (req, res) {
     });
 
     req.on("end", () => {
-      const word = q.query.word;
-      const definition = q.query.definition;
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      const params = JSON.parse(body);
+      const word = params.word;
+      const definition = params.definition;
+
+      console.log(params);
+      console.log(word);
 
       if (!word || !definition || /\d/.test(word)) {
         res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Invalid input" }));
+        res.end(JSON.stringify({ responseText: "Invalid input" }));
+        return;
       } else {
         if (dictionary[word]) {
           res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(
-            JSON.stringify({ message: `Warning! '${word}' already exists` })
+          return res.end(
+            JSON.stringify({
+              responseText: `Warning! '${word}' already exists`,
+            })
           );
         } else {
           dictionary[word] = definition;
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(
             JSON.stringify({
-              message: `Request #${
+              responseText: `Request #${
                 Object.keys(dictionary).length
               }\n\nNew entry recorded:\n\n"${word} : ${definition}"`,
             })
           );
+          return;
         }
       }
     });
