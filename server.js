@@ -2,7 +2,14 @@ const http = require("http");
 const url = require("url");
 const port = process.env.PORT || 3000;
 
-let dictionary = {};
+class Word {
+  constructor(word, definition) {
+    this.word = word;
+    this.definition = definition;
+  }
+}
+
+let wordStorage = [];
 
 let count = 0;
 
@@ -21,7 +28,7 @@ const server = http.createServer(function (req, res) {
   if (req.method === "GET" && q.pathname === "/api/") {
     res.setHeader("Access-Control-Allow-Origin", "*");
     const word = q.query.word;
-    const word_status = dictionary[word];
+    const word_status = wordStorage.find(entry => entry.word === word);
     console.log("word", word);
     console.log("wordstatus", word_status);
 
@@ -30,16 +37,16 @@ const server = http.createServer(function (req, res) {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(
         JSON.stringify({
-          responseText: `Request #"${count}"\n\n Definition: "${word_status}"`,
+          responseText: `Request #"${count}"\n\n Definition: "${word_status.definition}"`,
         })
       );
       return;
     } else {
       count++;
-      res.writeHead(404, { "Content-Type": "application/json" }); 
+      res.writeHead(404, { "Content-Type": "application/json" });
       res.end(
         JSON.stringify({
-          responseText: `Request #"${count}"\n\n Word not found in the dictionary`,
+          responseText: `Request #"${count}"\n\n Word not found in the wordStorage`,
         })
       );
       return;
@@ -65,7 +72,8 @@ const server = http.createServer(function (req, res) {
         res.end(JSON.stringify({ responseText: "Invalid input" }));
         return;
       } else {
-        if (dictionary[word]) {
+        const wordExists = wordStorage.some(entry => entry.word === word);
+        if (wordExists) {
           count++;
           res.writeHead(200, { "Content-Type": "application/json" });
           return res.end(
@@ -75,14 +83,15 @@ const server = http.createServer(function (req, res) {
           );
         } else {
           count++;
-          dictionary[word] = definition;
+          const newWord = new Word(word, definition);
+          wordStorage.push(newWord);
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(
             JSON.stringify({
               responseText: `Request #${count}\n\nNew entry recorded:\n\n"${word} : ${definition}"`,
             })
           );
-          console.log("dict", dictionary);
+          console.log("dict", wordStorage);
           return;
         }
       }
@@ -92,4 +101,4 @@ const server = http.createServer(function (req, res) {
 
 const PORT = process.env.PORT || 3000
 
-server.listen(PORT, () => console.log(`Server Listening on ${PORT}`))
+server.listen(PORT, () => console.log(`Server Listening on ${PORT}`));
