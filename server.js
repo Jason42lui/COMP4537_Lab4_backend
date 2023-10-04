@@ -1,5 +1,6 @@
 const http = require("http");
 const url = require("url");
+const port = process.env.PORT || 3000;
 
 let dictionary = {};
 
@@ -89,6 +90,6 @@ const server = http.createServer(function (req, res) {
   }
 });
 
-server.listen(3000, () => {
-  console.log("Server is running on http://localhost:3000");
+server.listen(port, () => {
+  console.log("Server is running on " + port);
 });
