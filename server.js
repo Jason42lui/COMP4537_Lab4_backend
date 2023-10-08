@@ -85,7 +85,7 @@ const server = http.createServer(function (req, res) {
         } else {
           count++;
           const newWord = new Word(word, definition);
-          wordStorage.push(newWord);
+          dictionary.push(newWord);
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(
             JSON.stringify({
