@@ -18,12 +18,13 @@ const server = http.createServer(function (req, res) {
   if (req.method === "OPTIONS") {
     res.writeHead(200, {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST",
+      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     });
     res.end();
     return;
   }
+  
 
   if (req.method === "GET" && q.pathname === "/api/") {
     res.setHeader("Access-Control-Allow-Origin", "*");
