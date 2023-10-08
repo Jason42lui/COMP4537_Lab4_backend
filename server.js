@@ -9,7 +9,7 @@ class Word {
   }
 }
 
-let wordStorage = [];
+let dictionary = [];
 
 let count = 0;
 
@@ -28,7 +28,7 @@ const server = http.createServer(function (req, res) {
   if (req.method === "GET" && q.pathname === "/api/") {
     res.setHeader("Access-Control-Allow-Origin", "*");
     const word = q.query.word;
-    const word_status = wordStorage.find(entry => entry.word === word);
+    const word_status = dictionary.find(entry => entry.word === word);
     console.log("word", word);
     console.log("wordstatus", word_status);
 
@@ -46,7 +46,7 @@ const server = http.createServer(function (req, res) {
       res.writeHead(404, { "Content-Type": "application/json" });
       res.end(
         JSON.stringify({
-          responseText: `Request #"${count}"\n\n Word not found in the wordStorage`,
+          responseText: `Request #"${count}"\n\n Word not found in the dictionary`,
         })
       );
       return;
@@ -72,7 +72,7 @@ const server = http.createServer(function (req, res) {
         res.end(JSON.stringify({ responseText: "Invalid input" }));
         return;
       } else {
-        const wordExists = wordStorage.some(entry => entry.word === word);
+        const wordExists = dictionary.some(entry => entry.word === word);
         if (wordExists) {
           count++;
           res.writeHead(200, { "Content-Type": "application/json" });
@@ -91,7 +91,7 @@ const server = http.createServer(function (req, res) {
               responseText: `Request #${count}\n\nNew entry recorded:\n\n"${word} : ${definition}"`,
             })
           );
-          console.log("dict", wordStorage);
+          console.log("dict", dictionary);
           return;
         }
       }
