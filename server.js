@@ -18,11 +18,15 @@ const server = http.createServer(function (req, res) {
   // Parsing URL
   let q = url.parse(req.url, true);
   // Handeling CORS request
-  res.writeHead(200, {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST",
-    "Access-Control-Allow-Headers": "Content-Type",
-  });
+  if (req.method === "OPTIONS") {
+    res.writeHead(200, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST",
+      "Access-Control-Allow-Headers": "Content-Type",
+    });
+    res.end();
+    return;
+  }
   
   // GET request with /api/ endpoint for calling the URL
   if (req.method === "GET" && q.pathname === "/api/") {
