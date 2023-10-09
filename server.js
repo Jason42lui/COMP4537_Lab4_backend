@@ -17,7 +17,7 @@ let count = 0;
 const server = http.createServer(function (req, res) {
   // Parsing URL
   let q = url.parse(req.url, true);
-  // Handeling CORS request
+  // Handeling CORS preflight request and checks if the server is receiving CORS
   if (req.method === "OPTIONS") {
     res.writeHead(200, {
       "Access-Control-Allow-Origin": "*",
