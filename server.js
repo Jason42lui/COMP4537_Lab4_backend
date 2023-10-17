@@ -2,6 +2,20 @@ const http = require("http");
 const url = require("url");
 const port = process.env.PORT || 3000;
 
+const OPTIONS_STRING = "OPTIONS";
+const POST_STRING = "POST";
+const GET_STRING = "GET";
+const ACCESS_CONTROL_ORIGIN_STRING = "Access-Control-Allow-Origin";
+const ACCESS_CONTROL_METHODS_STRING = "Access-Control-Allow-Methods";
+const ACCESS_CONTROL_HEADERS_STRING = "Access-Control-Allow-Headers";
+const STAR_STRING = "*";
+const CONTENT_TYPE_STRING = "Content-Type";
+const APPLICATION_JSON_STRING = "application/json";
+const API_STRING = "/api/";
+const DATA_STRING = "data";
+const END_STRING = "end";
+const INVALID_INPUT_STRING = "Invalid input";
+
 // Defining Word Class
 class Word {
   constructor(word, definition) {
@@ -9,38 +23,39 @@ class Word {
     this.definition = definition;
   }
 }
+
 // Initializing an empty dictionary and count variable
-let dictionary = [];
+const dictionary = [];
 let count = 0;
 
-// Initialize HTTP server method, which is passing callback fucntion for incoming requests.
+// Initialize HTTP server method, which is passing callback function for incoming requests.
 const server = http.createServer(function (req, res) {
   // Parsing URL
-  let q = url.parse(req.url, true);
-  // Handeling CORS preflight request and checks if the server is receiving CORS
-  if (req.method === "OPTIONS") {
+  const q = url.parse(req.url, true);
+
+  // Handling CORS preflight request and checks if the server is receiving CORS
+  if (req.method === OPTIONS_STRING) {
     res.writeHead(200, {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST",
-      "Access-Control-Allow-Headers": "Content-Type",
+      [ACCESS_CONTROL_ORIGIN_STRING]: STAR_STRING,
+      [ACCESS_CONTROL_METHODS_STRING]: POST_STRING,
+      [ACCESS_CONTROL_HEADERS_STRING]: CONTENT_TYPE_STRING,
     });
     res.end();
     return;
   }
-  
+
   // GET request with /api/ endpoint for calling the URL
-  if (req.method === "GET" && q.pathname === "/api/") {
+  if (req.method === GET_STRING && q.pathname === API_STRING) {
     // CORS header to allow request from anywhere "*"
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader(ACCESS_CONTROL_ORIGIN_STRING, "*");
     const word = q.query.word;
     // Search in the dictionary array that matches with the requested word. Find looks for the word and see if it matches with the requested word.
-    const word_status = dictionary.find(entry => entry.word === word);
-    console.log("word", word);
-    console.log("wordstatus", word_status);
+    const word_status = dictionary.find((entry) => entry.word === word);
+
     // Good response for the JSON object for the requested word
     if (word_status) {
       count++;
-      res.writeHead(200, { "Content-Type": "application/json" });
+      res.writeHead(200, { CONTENT_TYPE_STRING: APPLICATION_JSON_STRING });
       res.end(
         JSON.stringify({
           responseText: `Request #"${count}"\n\n Definition: "${word_status.definition}"`,
@@ -50,7 +65,7 @@ const server = http.createServer(function (req, res) {
     } else {
       // Bad response for the JSON object for the requested word
       count++;
-      res.writeHead(404, { "Content-Type": "application/json" });
+      res.writeHead(404, { CONTENT_TYPE_STRING: APPLICATION_JSON_STRING });
       res.end(
         JSON.stringify({
           responseText: `Request #"${count}"\n\n Word not found in the dictionary`,
@@ -58,19 +73,18 @@ const server = http.createServer(function (req, res) {
       );
       return;
     }
-    // POST request with /api/ endpoint
-  } else if (req.method === "POST" && q.pathname === "/api/") {
+  } else if (req.method === POST_STRING && q.pathname === API_STRING) {
     // Empty String to store new request body
     let body = "";
 
-    // Listening if request body receives any data chucks
-    req.on("data", (chunk) => {
+    // Listening if request body receives any data chunks
+    req.on(DATA_STRING, (chunk) => {
       body += chunk.toString();
     });
 
-    // Received request bdoy will set the CORS header to allow anyone
-    req.on("end", () => {
-      res.setHeader("Access-Control-Allow-Origin", "*");
+    // Received request body will set the CORS header to allow anyone
+    req.on(END_STRING, () => {
+      res.setHeader(ACCESS_CONTROL_ORIGIN_STRING, STAR_STRING);
       const params = JSON.parse(body);
       const word = params.word;
       const definition = params.definition;
@@ -78,35 +92,35 @@ const server = http.createServer(function (req, res) {
       console.log(params);
       console.log(word);
 
-      // Checks for invalid input empty word, definiation, or word is a digit. (Already done in front end)
+      // Checks for invalid input empty word, definition, or word is a digit. (Already done in front end)
       if (!word || !definition || /\d/.test(word)) {
-        res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ responseText: "Invalid input" }));
+        res.writeHead(400, { CONTENT_TYPE_STRING: APPLICATION_JSON_STRING });
+        res.end(JSON.stringify({ responseText: INVALID_INPUT_STRING }));
         return;
       } else {
         // Checking if the word exists in the dictionary
-        const wordExists = dictionary.some(entry => entry.word === word);
-        // If it is, send a response to front-end as a warning msg
+        const wordExists = dictionary.some((entry) => entry.word === word);
+
+        // If it is, send a response to front-end as a warning message
         if (wordExists) {
           count++;
-          res.writeHead(200, { "Content-Type": "application/json" });
+          res.writeHead(200, { CONTENT_TYPE_STRING: APPLICATION_JSON_STRING });
           return res.end(
             JSON.stringify({
               responseText: `Request #"${count}"\n\nWarning! '${word}' already exists`,
             })
           );
         } else {
-          // if words is not found, add it to the dictionary
+          // if word is not found, add it to the dictionary
           count++;
           const newWord = new Word(word, definition);
           dictionary.push(newWord);
-          res.writeHead(200, { "Content-Type": "application/json" });
+          res.writeHead(200, { CONTENT_TYPE_STRING: APPLICATION_JSON_STRING });
           res.end(
             JSON.stringify({
               responseText: `Request #${count}\n\nNew entry recorded:\n\n"${word} : ${definition}"`,
             })
           );
-          console.log("dict", dictionary);
           return;
         }
       }
